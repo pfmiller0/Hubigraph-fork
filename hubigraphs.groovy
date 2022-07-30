@@ -26,11 +26,11 @@ def mainPage(){
     
     if (latitude && longitude && apikey) {
         childDevice = getChildDevice("OPEN_WEATHER${app.id}");     
-        log.debug(childDevice);
+        if (debugMode) log.debug(childDevice);
     
          if (!childDevice) {
             device_name="Open Weather Child Device";
-            log.debug("Creating Device $device_name");
+            if (debugMode) log.debug("Creating Device $device_name");
             childDevice = addChildDevice("tchoward", "OpenWeather Hubigraph Driver", "OPEN_WEATHER${app.id}", null,[completedSetup: true, label: device_name]) 
             log.info "Successfully Created Child"    
         }
@@ -44,29 +44,27 @@ def mainPage(){
     
     dynamicPage(name: "mainPage"){
        section {
-            app(name: "hubiGraphLine", appName: "Hubigraph Line Graph",    namespace: "tchoward", title: "Create New Line Graph (Deprecated)", multiple: true)
-            app(name: "hubiBarGraph",  appName: "Hubigraph Bar Graph",     namespace: "tchoward", title: "Create New Bar Graph", multiple: true)
-			app(name: "hubiRangeBar",  appName: "Hubigraph Range Bar",     namespace: "tchoward", title: "Create New Range Bar", multiple: true)
-            app(name: "hubiGraphTime", appName: "Hubigraph Time Line",     namespace: "tchoward", title: "Create New Time Line", multiple: true)
-            app(name: "hubiGauge",     appName: "Hubigraph Gauge",         namespace: "tchoward", title: "Create New Gauge", multiple: true)
-            app(name: "hubiTimeGraph", appName: "Hubigraph Time Graph",    namespace: "tchoward", title: "Create New Time Graph", multiple: true)
-            app(name: "hubiHeatMap",   appName: "Hubigraph Heat Map",      namespace: "tchoward", title: "Create New Heat Map", multiple: true)
-            app(name: "hubiWeather",   appName: "Hubigraph Weather Tile",  namespace: "tchoward", title: "Create New Weather Tile", multiple: true)
-            app(name: "hubiForecast",  appName: "Hubigraph Forecast Tile", namespace: "tchoward", title: "Create New Forecast Tile", multiple: true)
-            app(name: "hubiWeather2",   appName: "Hubigraph Weather Tile 2",  namespace: "tchoward", title: "Create New Weather Tile 2", multiple: true)
-            app(name: "hubiRadar",      appName: "Hubigraph Radar Tile",      namespace: "tchoward", title: "Create New Radar Tile", multiple: true)
-
-
+            //app(name: "hubiGraphLine", appName: "Hubigraph Line Graph",    namespace: "tchoward", title: "Create New Line Graph (Deprecated)", multiple: true)
+            //app(name: "hubiBarGraph",  appName: "Hubigraph Bar Graph",     namespace: "tchoward", title: "Create New Bar Graph", multiple: true)
+            //app(name: "hubiRangeBar",  appName: "Hubigraph Range Bar",     namespace: "tchoward", title: "Create New Range Bar", multiple: true)
+            //app(name: "hubiGraphTime", appName: "Hubigraph Time Line",     namespace: "tchoward", title: "Create New Time Line", multiple: true)
+            //app(name: "hubiGauge",     appName: "Hubigraph Gauge",         namespace: "tchoward", title: "Create New Gauge", multiple: true)
+	    app(name: "hubiTimeGraph", appName: "Hubigraph Time Graph",    namespace: "tchoward", title: "Create New Time Graph", multiple: true)
+            //app(name: "hubiHeatMap",   appName: "Hubigraph Heat Map",      namespace: "tchoward", title: "Create New Heat Map", multiple: true)
+            //app(name: "hubiWeather",   appName: "Hubigraph Weather Tile",  namespace: "tchoward", title: "Create New Weather Tile", multiple: true)
+            //app(name: "hubiForecast",  appName: "Hubigraph Forecast Tile", namespace: "tchoward", title: "Create New Forecast Tile", multiple: true)
+            //app(name: "hubiWeather2",   appName: "Hubigraph Weather Tile 2",  namespace: "tchoward", title: "Create New Weather Tile 2", multiple: true)
+            //app(name: "hubiRadar",      appName: "Hubigraph Radar Tile",      namespace: "tchoward", title: "Create New Radar Tile", multiple: true)
         }
-        section {
-            href name: "setupOpenWeather", title: "Setup Up Open Weather for Weather Tile", description: "", page: "setupOpenWeather"    
-        } 
+		section("Debug") {
+			input "debugMode", "bool", title: "Enable debug logging", defaultValue: false
+	}
     }
 }
 def getOpenWeatherData(){
     childDevice =  getChildDevice("OPEN_WEATHER${app.id}");
     if (!childDevice){
-         log.debug("Error: No Child Found");
+         if (debugMode) log.debug("Error: No Child Found");
          return null;
     }
     return(childDevice.getWeatherData());
@@ -96,17 +94,13 @@ def makeCopy(child){
 }
 
 def installed() {
-    log.debug "Installed with settings: ${settings}"
+    if (debugMode) log.debug "Installed with settings: ${settings}"
     initialize()
 }
 
 def updated() {
-    log.debug "Updated with settings: ${settings}"
-    
-    
-    
-   
-    
+    if (debugMode) log.debug "Updated with settings: ${settings}"
+
     unsubscribe()
     initialize()
 }
@@ -114,9 +108,11 @@ def updated() {
 def initialize() {
     // nothing needed here, since the child apps will handle preferences/subscriptions
     // this just logs some messages for demo/information purposes
-    log.debug "there are ${childApps.size()} child smartapps"
-    childApps.each {child ->
-        log.debug "child app: ${child.label}"
+    if (debugMode) {
+		log.debug "there are ${childApps.size()} child smartapps"
+    	childApps.each {child ->
+        	log.debug "child app: ${child.label}"
+		}
     }
 }
 
@@ -910,11 +906,11 @@ def hubiTool_create_tile(child, location="graph") {
                 log.info "Creating HubiGraph Child Device"
         
                 def childDevice = getChildDevice("HUBIGRAPH_${app.id}");     
-                log.debug(childDevice);
+                if (debugMode) log.debug(childDevice);
                 
                 if (!childDevice) {
                         if (!device_name) device_name="Dummy Device";
-                        log.debug("Creating Device $device_name");
+                        if (debugMode) log.debug("Creating Device $device_name");
                         childDevice = addChildDevice("tchoward", "Hubigraph Tile Device", "HUBIGRAPH_${app.id}", null,[completedSetup: true, label: device_name]) 
                         log.info "Created HTTP Switch [${childDevice}]"
                         
