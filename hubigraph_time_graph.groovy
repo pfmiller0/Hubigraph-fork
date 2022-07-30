@@ -145,8 +145,8 @@ def graphSetupPage(){
                         ["2419200000":"1 Month"], 
                         ["custom": "Custom Timespan"]];
      
-     def timespanEnum2 = [["10":"10 Milliseconds"], ["1000":"1 Second"], ["5000":"5 Seconds"], ["30000":"30 Seconds"], ["60000":"1 Minute"], ["120000":"2 Minutes"], ["300000":"5 Minutes"], ["600000":"10 Minutes"],
-                          ["2400000":"30 minutes"], ["3600000":"1 Hour"], ["43200000":"12 Hours"], ["86400000":"1 Day"], ["259200000":"3 Days"], ["604800000":"1 Week"]];
+    def timespanEnum2 = [["30000":"30 Seconds"], ["60000":"1 Minute"], ["120000":"2 Minutes"], ["300000":"5 Minutes"], ["600000":"10 Minutes"], ["2400000":"30 minutes"],
+                         ["3600000":"1 Hour"], ["10800000":"3 Hours"], ["21600000":"6 Hours"], ["43200000":"12 Hours"], ["86400000":"1 Day"], ["259200000":"3 Days"], ["604800000":"1 Week"]];
     
     def updateRateEnum = [["-1":"Never"], ["0":"Real Time"], ["1000":"1 Second"], ["60000":"1 Minute"], ["300000":"5 Minutes"], ["600000":"10 Minutes"], ["1200000":"20 Minutes"], ["1800000":"Half Hour"], ["3600000":"1 Hour"]];
                  
@@ -227,9 +227,9 @@ def graphSetupPage(){
             container << parent.hubiForm_switch(this, title: "<b>Show Title on Graph</b>", name: "graph_show_title", default: false, submit_on_change: true);
             if (graph_show_title==true) {
                 container << parent.hubiForm_text_input (this, "<b>Graph Title</b>", "graph_title", "Graph Title", false);
-                container << parent.hubiForm_font_size  (this, title: "Title", name: "graph_title", default: 9, min: 2, max: 20);
+                container << parent.hubiForm_font_size  (this, title: "Title", name: "graph_title", default: 12, min: 2, max: 20);
                 container << parent.hubiForm_color      (this, "Title", "graph_title", "#000000", false);
-                container << parent.hubiForm_switch     (this, title: "Graph Title Inside Graph?", name: "graph_title_inside", default: false);
+                container << parent.hubiForm_switch     (this, title: "Graph Title Inside Graph?", name: "graph_title_inside", default: true);
             }
             parent.hubiForm_container(this, container, 1); 
         }
@@ -237,14 +237,14 @@ def graphSetupPage(){
          parent.hubiForm_section(this, "Graph Size", 1){
             container = [];
 
-            container << parent.hubiForm_switch     (this,  title: "<b>Set Fill % of Graph?</b><br><small>(False = Default (80%) Fill)</small>", 
+            container << parent.hubiForm_switch     (this,  title: "<b>Set Fill % of Graph?</b><br><small>(False = Default (90%) Fill)</small>", 
                                                             name: "graph_percent_fill", default: false, submit_on_change: true);
             if (graph_percent_fill==true){   
 
                 container << parent.hubiForm_slider (this,  title: "Horizontal fill % of the graph", name: "graph_h_fill",  
-                                                            default: 80, min: 1, max: 100, units: "%", submit_on_change: false);
+                                                            default: 90, min: 1, max: 100, units: "%", submit_on_change: false);
                 container << parent.hubiForm_slider (this,  title: "Vertical fill % of the graph", name: "graph_v_fill",  
-                                                            default: 80, min: 1, max: 100, units: "%", submit_on_change: false); 
+                                                            default: 90, min: 1, max: 100, units: "%", submit_on_change: false); 
                                                        
             }
             container << parent.hubiForm_switch     (this,  title: "<b>Set size of Graph?</b><br><small>(False = Fill Window)</small>", 
@@ -819,7 +819,6 @@ def mainPage() {
                                 if (atomicState["history_${sensor.id}_${attribute}"]){
                                     data = atomicState["history_${sensor.id}_${attribute}"];
                                     container << parent.hubiForm_text(this, "<b>${sensor.displayName} - ${attribute}</b><br><small>${new Date(data[0].date)}<br>${new Date(data[data.size-1].date)}<br>${data.size} Events </small>");
-                                                       
                                 }
                             }
                         }
@@ -830,7 +829,6 @@ def mainPage() {
                         parent.hubiForm_container(this, container, 1);
                     }
                 }
-                
                 
                 if (graph_timespan){
                      parent.hubiForm_section(this, "Preview", 10, "show_chart"){                         
@@ -881,16 +879,14 @@ def longTermStoragePage(){
            then -= 1.days;
     }
     
-    dynamicPage(name: "longTermStoragePage", title: "") {
-        
+	dynamicPage(name: "longTermStoragePage", title: "") {
         def total_bytes = 0;
         def recommendedUpdateRate = 0;
         
         section() {
             if(!sensors) {
                 paragraph "Please select Sensors and Graph Options Before setting up storage"
-            } else {
-                          
+            } else {    
                 sensors.each { sensor ->
                     resp[sensor.id] = [:];
                         settings["attributes_${sensor.id}"].each {attribute ->
@@ -908,19 +904,19 @@ def longTermStoragePage(){
                     }
                     
                 }
-                    
-                parent.hubiForm_section(this, "Storage Options", 1, "memory"){
-                    def timeEnum = ["1 Day", "2 Days", "3 Days", "4 Days", "5 Days", "6 Days", "1 Week", "2 Weeks", "3 Weeks", "1 Month", "2 Months", "Indefinite"];
-                    def updateEnum = ["5 Minutes", "15 Minutes", "30 Minutes", "1 Hour", "2 Hours", "3 Hours", "4 Hours", "5 Hours", "6 Hours"];
-                    
+
+				parent.hubiForm_section(this, "Storage Options", 1, "memory"){
+                    def timeEnum = ["1 Day", "2 Days", "3 Days", "4 Days", "5 Days", "6 Days", "1 Week", "2 Weeks", "3 Weeks", "1 Month", "2 Months", "6 Months", "12 Months", "Indefinite"];
+                    def updateEnum = ["5 Minutes", "15 Minutes", "30 Minutes", "1 Hour", "2 Hours", "3 Hours", "4 Hours", "5 Hours", "6 Hours", "12 Hours"];
+                  
                     container = [];
                     container << parent.hubiForm_switch(this, title: "<b>Utilize Long Term Storage for Sensors</b>", 
                                                               name: "lts", 
                                                               default: false, 
                                                               submit_on_change: true);
                             
-                    if (lts == true){                         
-                        container << parent.hubiForm_enum(this, title: "Time of Storage to Maintain",
+                    if (lts == true){
+                       container << parent.hubiForm_enum(this, title: "Time of Storage to Maintain",
                                                                 name: "lts_time",
                                                                 list: timeEnum,
                                                                 default: "1 Week",
@@ -931,7 +927,7 @@ def longTermStoragePage(){
                                                                 list: updateEnum,
                                                                 default: "1 Hour",
                                                                 submit_on_change: false);
-                        
+                       
                         if (lts_time == null) 
                             app.updateSetting("lts_time",   [type: "enum", value: "1 Week"]);
                             app.updateSetting("lts_update", [type: "enum", value: "1 Hour"]);
@@ -940,7 +936,7 @@ def longTermStoragePage(){
                         def factor = getDays(lts_time);
                         
                         factor = (total_bytes*factor);
-                        
+                       
                         if (factor < 1024){
                              factor = factor.setScale(1, BigDecimal.ROUND_DOWN);
                              factorString = factor+" Kb";
@@ -949,10 +945,7 @@ def longTermStoragePage(){
                              factor = factor.setScale(2, BigDecimal.ROUND_DOWN);
                              factorString = factor+" Mb";
                         }
-                        
                         container << parent.hubiForm_text(this, "Estimated Storage Needed: "+factorString+"<br>Recommended Update Rate: "+Math.floor((recommendedUpdateRate/60))+" hours" );
-
-               
                     } else {
                         sensors.each { sensor ->
                             settings["attributes_${sensor.id}"].each {attribute ->
@@ -961,10 +954,7 @@ def longTermStoragePage(){
                         }
                     }
                     parent.hubiForm_container(this, container, 1);
-                }  
-                
-
-
+                }
             } //else
         }
     }
@@ -980,19 +970,20 @@ def longTermStorageUpdate(){
 }
 
 def getDays(str){
-
     switch (str){
         case "1 Day":      return 1; break;
-        case "2 Days":      return 2; break;
-        case "3 Days":      return 3; break;
-        case "4 Days":      return 4; break;
-        case "5 Days":      return 5; break;
-        case "6 Days":      return 6; break;
+        case "2 Days":     return 2; break;
+        case "3 Days":     return 3; break;
+        case "4 Days":     return 4; break;
+        case "5 Days":     return 5; break;
+        case "6 Days":     return 6; break;
         case "1 Week":     return 7; break;
         case "2 Weeks":    return 14; break;
         case "3 Weeks":    return 21; break;
         case "1 Month":    return 30; break;
         case "2 Months":   return 60; break;
+		case "6 Months":   return 182; break;
+        case "12 Months":  return 365; break;
         case "Indefinite": return 0; break;
     }    
     
@@ -1029,7 +1020,6 @@ def updated() {
     minutes = now.getMinutes();
     rate = minutes % 15;
     
-    
     if (lts){
         switch (lts_update){
             case "5 Minutes" :  schedule("${minutes} ${minutes % 5}/5 ) * * * ? *", longTermStorageUpdate); break;
@@ -1043,7 +1033,6 @@ def updated() {
             case "6 Hours" :    schedule("${minutes} ${minutes} 0/6 * * ? *", longTermStorageUpdate); break;
         }
     }
-    
 }
 
 def initialize() {
@@ -1131,7 +1120,7 @@ def getChartOptions(){
     
     /*Setup Series*/
     def series = ["series" : [:]];
-        
+
     def options = [
         "graphReduction": graph_max_points,
         "graphTimespan": Long.parseLong("${graph_timespan}"),
@@ -1146,8 +1135,8 @@ def getChartOptions(){
             "tooltip" : ["format" : "short"], 
             "width": graph_static_size ? graph_h_size : "100%",
             "height": graph_static_size ? graph_v_size : "100%",
-            "chartArea": [  "width":    graph_percent_fill ? "${graph_h_fill}%" : "80%", 
-                            "height":   graph_percent_fill ? "${graph_v_fill}%" : "80%"],
+            "chartArea": [  "width":    graph_percent_fill ? "${graph_h_fill}%" : "90%", 
+                            "height":   graph_percent_fill ? "${graph_v_fill}%" : "90%"],
             "hAxis": ["textStyle": ["fontSize": graph_haxis_font, 
                                     "color": graph_hh_color_transparent ? "transparent" : graph_hh_color ], 
                       "gridlines": ["color": graph_ha_color_transparent ? "transparent" : graph_ha_color, 
@@ -1198,7 +1187,7 @@ def getChartOptions(){
             
         ]
     ];
-    
+
     count_ = 0;
     temp_sensors = sensors.sort{it.id.toInteger()};
     temp_sensors.each { sensor ->
@@ -1229,7 +1218,7 @@ def getChartOptions(){
             count_ ++;
        }
     }
-        
+   
     //add colors and thicknesses
     sensors.each { sensor ->
         settings["attributes_${sensor.id}"].each { attribute ->
@@ -1250,7 +1239,7 @@ def getChartOptions(){
             options.graphOptions.series << annotations;  
         }
     }    
-    
+
     return options;
 }
         
@@ -1278,13 +1267,14 @@ def getRGBA(hex, opacity){
 }
 
 def getLineGraph() {
-    def fullSizeStyle = "margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden";
+    def fullSizeStyle = "margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color:dimgray;";
     
     def html = """
     <html style="${fullSizeStyle}">
     <link rel='icon' href='https://www.shareicon.net/data/256x256/2015/09/07/97252_barometer_512x512.png' type='image/x-icon'/> 
     <link rel="apple-touch-icon" href="https://www.shareicon.net/data/256x256/2015/09/07/97252_barometer_512x512.png">
     <head>
+      <title>${app.getLabel()}</title>
       <script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.16/svg.min.js" integrity="sha256-MCvBrhCuX8GNt0gmv06kZ4jGIi1R2QNaSkadjRzinFs=" crossorigin="anonymous"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>      
@@ -1397,7 +1387,7 @@ async function onLoad() {
                 z-index: 100;
                 width: 100%;
                 height: 100%;
-                background-color: white;                
+                background-color: dimgray;                
                 display: flex;
                 flex-flow: column nowrap;
                 justify-content: center;
@@ -1461,7 +1451,7 @@ async function onLoad() {
                 width: 10px;
                 height: 10px;
 
-                border: solid 5px black;
+                border: solid 5px white;
                 border-radius: 5px;
 
                 animation-name: bounce;
@@ -1483,6 +1473,7 @@ async function onLoad() {
 
             .text {
                 font-family: Arial;
+                font-color: white;
                 font-weight: 200;
                 font-size: 2rem;
                 text-align: center;
@@ -1781,7 +1772,7 @@ function placeMarker(dataTable) {
       <div id="timeline" style="${fullSizeStyle}" align="center"></div>
     """
     if (show_overlay==true) html+= getOverlay();
-    
+   
     html+= """
         
       </body>
@@ -1791,8 +1782,6 @@ function placeMarker(dataTable) {
     
     return html;
 }
-
-
 
 def getOverlay(){
  
@@ -1854,7 +1843,7 @@ def initializeAppEndpoint() {
 
 //oauth endpoints
 def getGraph() {
-    render(contentType: "text/html", data: getLineGraph());      
+    render(contentType: "text/html", data: getLineGraph());
 }
 
 def getDataMetrics() {
