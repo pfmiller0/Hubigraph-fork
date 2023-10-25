@@ -1011,7 +1011,8 @@ private removeChildDevices(delete) {
 
 def updated() {
     app.updateLabel(app_name);
-    
+	state.localEndpointURL = fullLocalApiServerUrl("");
+	
     if (install_device == true){
         parent.hubiTool_create_tile(this);
     }
