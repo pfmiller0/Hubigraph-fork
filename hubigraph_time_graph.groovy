@@ -58,7 +58,6 @@ definition(
     iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
 )
 
-
 preferences {
     section ("test"){
        page(name: "mainPage", install: true, uninstall: true)
@@ -68,7 +67,6 @@ preferences {
        page(name: "enableAPIPage")
        page(name: "disableAPIPage")
 }
-   
 
     mappings {
         path("/graph/") {
@@ -118,7 +116,6 @@ def getEvents(sensor, attribute, num){
            then -= 2.days;
      }
      
-  
      def respEvents = [];                  
      respEvents << sensor.statesSince(attribute, then, [max: 200]){ it.value };
      respEvents = respEvents.flatten();
@@ -150,12 +147,8 @@ def graphSetupPage(){
     
     def updateRateEnum = [["-1":"Never"], ["0":"Real Time"], ["1000":"1 Second"], ["60000":"1 Minute"], ["300000":"5 Minutes"], ["600000":"10 Minutes"], ["1200000":"20 Minutes"], ["1800000":"Half Hour"], ["3600000":"1 Hour"]];
                  
-    
-    
     dynamicPage(name: "graphSetupPage") {
         
-          
-      
         parent.hubiForm_section(this,"General Options", 1)
         {      
             input( type: "enum", name: "graph_update_rate", title: "<b>Integration Time</b><br><small>(The amount of time each data point covers)</small>", 
@@ -217,8 +210,7 @@ def graphSetupPage(){
             container << parent.hubiForm_switch(this, title: "<b>Flip Graph to Vertical?</b><br><small>(Rotate 90 degrees)</small>", name: "graph_y_orientation", default: false);
             container << parent.hubiForm_switch(this, title: "<b>Reverse Data Order?</b><br><small> (Flip data left to Right)</small>", name: "graph_z_orientation", default: false)
               
-            parent.hubiForm_container(this, container, 1); 
-     
+            parent.hubiForm_container(this, container, 1);
         }
              
         parent.hubiForm_section(this,"Graph Title", 1)
@@ -300,11 +292,8 @@ def graphSetupPage(){
                container << parent.hubiForm_table(this, header: header, rows: rows);
                container << parent.hubiForm_text(this, """<b><small>Example: "EEEE, MMM d, Y hh:mm:ss a" <br>= "Monday, June 2, 2020 08:21:33 AM</small></b>""")
             }
-                 
-            
             
             parent.hubiForm_container(this, container, 1); 
-          
          }
             
         //Vertical Axis
@@ -366,7 +355,6 @@ def graphSetupPage(){
             } else {
                  parent.hubiForm_container(this, container, 1); 
             }
-
         }
         
         parent.hubiForm_section(this, "Current Value Overlay", 1){
@@ -651,7 +639,6 @@ def graphSetupPage(){
                                     }  
                                 
                                     //Update Settings
-                                    
                                     possible_values = [];
                                     for (i=0; i<Integer.parseInt(settings["attribute_${sensor.id}_${attribute}_num_custom_states"]); i++){
                                         if (settings["attribute_${sensor.id}_${attribute}_custom_state_${i}"] &&
@@ -727,7 +714,6 @@ def graphSetupPage(){
                             
                         parent.hubiForm_container(this, container, 1);         
                         cnt += 1;
-                
                     }//parent.hubiForm           
             }//attribute
         }//sensor
@@ -760,7 +746,6 @@ def deviceSelectionPage() {
                 }
             }
         }
-        
     }
 }
 
@@ -836,8 +821,8 @@ def mainPage() {
                          container << parent.hubiForm_graph_preview(this)
                          
                          parent.hubiForm_container(this, container, 1); 
-                     } //graph_timespan
-            
+                    } //graph_timespan
+ /*           
                     parent.hubiForm_section(this, "Hubigraph Tile Installation", 2, "apps"){
                         container = [];
                              
@@ -846,10 +831,10 @@ def mainPage() {
                              container << parent.hubiForm_text_input(this, "Name for HubiGraph Tile Device", "device_name", "Hubigraph Tile", "false");
                         }
                         parent.hubiForm_container(this, container, 1); 
-                    }
-                } 
-             
-            
+                   }
+ */
+				}
+
                if (state.endpoint){
                    parent.hubiForm_section(this, "Hubigraph Application", 1, "settings"){
                         container = [];
@@ -861,11 +846,9 @@ def mainPage() {
                         container << parent.hubiForm_page_button(this, "Disable API", "disableAPIPage", "100%", "cancel");  
                        
                         parent.hubiForm_container(this, container, 1); 
-                    }
-               }
-       
-            } //else 
-        
+                }
+            }
+        } //else 
     } //dynamicPage
 }
 
@@ -1011,8 +994,8 @@ private removeChildDevices(delete) {
 
 def updated() {
     app.updateLabel(app_name);
-	state.localEndpointURL = fullLocalApiServerUrl("");
-	
+    state.localEndpointURL = fullLocalApiServerUrl("");
+    
     if (install_device == true){
         parent.hubiTool_create_tile(this);
     }
@@ -1059,6 +1042,7 @@ private getValue(id, attr, val){
     return ret;
 }
 
+// TODO: Collapse saved data into hour/day blocks if saved data time is big enough (pfm)
 private cleanupData(data){
     def then = new Date();
     use (groovy.time.TimeCategory) {
@@ -1069,6 +1053,7 @@ private cleanupData(data){
     return data.findAll{ it.date >= then_milliseconds };
 }
 
+// TODO: Cleanup old devices? (pfm)
 private buildData() {
     def resp = [:]
     
@@ -1094,11 +1079,9 @@ private buildData() {
                      oldData = [];   
                 }
                 
-                            
                 newData << sensor.statesSince(attribute, then, [max: 2000]).collect{[ date: it.date.getTime(), value: getValue(sensor.id, attribute, it.value)]}
                 newData = newData.flatten();
                 oldData += newData.reverse();
-                
                          
                 resp[sensor.id][attribute] = oldData.findAll{ it.date > graph_time}; 
                 
@@ -1141,10 +1124,10 @@ def getChartOptions(){
                             "height":   graph_percent_fill ? "${graph_v_fill}%" : "90%"],
             "hAxis": ["textStyle": ["fontSize": graph_haxis_font, 
                                     "color": graph_hh_color_transparent ? "transparent" : graph_hh_color ], 
-                      "gridlines": ["color": graph_ha_color_transparent ? "transparent" : graph_ha_color, 
-                                    "count": graph_h_num_grid != "" ? graph_h_num_grid : null
-                                   ],
-                      "format":     graph_h_format==""?"":graph_h_format                          
+                      "gridlines": ["color": graph_ha_color_transparent ? "transparent" : graph_ha_color,
+                                    "count": graph_h_num_grid ?: null],
+					  //"format":     graph_h_format==""?"":graph_h_format
+                      "format":     graph_h_format
                      ],
             "vAxis": ["textStyle": ["fontSize": graph_vaxis_font, 
                                     "color": graph_vh_color_transparent ? "transparent" : graph_vh_color, 
@@ -1154,9 +1137,9 @@ def getChartOptions(){
             "vAxes": [
                 0: ["title" : graph_show_left_label ? graph_left_label: null,  
                     "titleTextStyle": ["color": graph_left_color_transparent ? "transparent" : graph_left_color, "fontSize": graph_left_font],
-                    "viewWindow": ["min": graph_vaxis_1_min != "" ?  graph_vaxis_1_min : null, 
-                                   "max":  graph_vaxis_1_max != "" ?  graph_vaxis_1_max : null],
-                    "gridlines": ["count" : graph_vaxis_1_num_lines != "" ? graph_vaxis_1_num_lines : null ],
+                    "viewWindow": ["min": graph_vaxis_1_min ?: null, 
+                                   "max":  graph_vaxis_1_max ?: null],
+                    "gridlines": ["count" : graph_vaxis_1_num_lines ?: null ],
                     "minorGridlines": ["count" : 0],
                     "format": graph_vaxis_1_format, 
                     
@@ -1164,9 +1147,9 @@ def getChartOptions(){
                 
                 1: ["title": graph_show_right_label ? graph_right_label : null,
                     "titleTextStyle": ["color": graph_right_color_transparent ? "transparent" : graph_right_color, "fontSize": graph_right_font],
-                    "viewWindow": ["min": graph_vaxis_2_min != "" ?  graph_vaxis_2_min : null, 
-                                   "max":  graph_vaxis_2_max != "" ?  graph_vaxis_2_max : null],
-                    "gridlines": ["count" : graph_vaxis_2_num_lines != "" ? graph_vaxis_2_num_lines : null ],
+                    "viewWindow": ["min": graph_vaxis_2_min ?: null, 
+                                   "max":  graph_vaxis_2_max ?: null],
+                    "gridlines": ["count" : graph_vaxis_2_num_lines ?: null ],
                     "minorGridlines": ["count" : 0],
                     "format": graph_vaxis_2_format, 
                     ]                
@@ -1186,7 +1169,6 @@ def getChartOptions(){
             "orientation" : graph_y_orientation == true ? "vertical" : "horizontal",
             "reverseCategories" : graph_x_orientation,
             "series": [:],
-            
         ]
     ];
 
@@ -1206,15 +1188,13 @@ def getChartOptions(){
             def point_type = settings["var_${sensor.id}_${attribute}_point_type"] != null ? settings["var_${sensor.id}_${attribute}_point_type"].toLowerCase() : "";
            
             type_ = type_=="bar" ? "bars" : type_;
-               
-               
+            
             options.graphOptions.series << ["$count_" : [ "type"            : type_,
                                                           "targetAxisIndex" : axes_,
                                                           "pointSize"       : point_size,
                                                           "pointShape"      : point_type,
                                                           "color"           : stroke_color,
                                                           "opacity"         : stroke_opacity,
-                                                          
                                                         ]
                                            ];
             count_ ++;
@@ -1228,14 +1208,9 @@ def getChartOptions(){
             def text_color = settings["graph_line_${sensor.id}_${attribute}_color"];
             def text_color_transparent = settings["graph_line_${sensor.id}_${attribute}_color_transparent"];
             
-            
-            
-            
             def annotations = [
                 "targetAxisIndex": axis, 
                 "color": text_color_transparent ? "transparent" : text_color                
-                
-                
             ];
             
             options.graphOptions.series << annotations;  
@@ -1255,7 +1230,6 @@ def removeLastChar(str) {
 }
 
 def getRGBA(hex, opacity){
-    
     def c = hex-"#";
     c = c.toUpperCase();
     i = Integer.parseInt(c, 16);
@@ -1269,7 +1243,7 @@ def getRGBA(hex, opacity){
 }
 
 def getLineGraph() {
-    def fullSizeStyle = "margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color:black;";    
+    def fullSizeStyle = "margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color:black;";
     def html = """
     <html style="${fullSizeStyle}">
     <link rel='icon' href='https://www.shareicon.net/data/256x256/2015/09/07/97252_barometer_512x512.png' type='image/x-icon'/> 
@@ -1328,7 +1302,6 @@ function getSubscriptions() {
     return jQuery.get("${state.localEndpointURL}getSubscriptions/?access_token=${state.endpointSecret}", (data) => {
         console.log("Got Subscriptions");
         subscriptions = data;
-        
     });
 }
 
@@ -1345,13 +1318,9 @@ function parseEvent(event) {
 
     //only accept relevent events
     
-
     if(subscriptions.ids.includes(deviceId) && subscriptions.attributes[deviceId].includes(event.name)) {
-        
         let value = isNaN(event.value) ? event.value.replace(/ /g,'') : parseFloat((Math.round(event.value * 100) / 100).toFixed(2));
-        
         let attribute = event.name;
-
         let state = isNaN(value) ? subscriptions.states[deviceId][attribute][value] : undefined;
          
         if (state != undefined){
@@ -1359,7 +1328,6 @@ function parseEvent(event) {
         }
 
         graphData[deviceId][attribute].push({ date: now, value: value });
-
         updateOverlay(deviceId, attribute, value);
               
         if(options.graphRefreshRate === 0) update();
@@ -1435,11 +1403,9 @@ async function onLoad() {
                 0% {
                     transform: translateY(0);
                 }
-
                 50% {
                     transform: translateY(-50px);
                 }
-
                 100% {
                     transform: translateY(0);
                 }
@@ -1584,7 +1550,6 @@ function midEvents(minTime, maxTime, data, drop_val) {
 
 
 function getStyle(deviceIndex, attribute){
-    
         let style = subscriptions.var[deviceIndex][attribute]
         let stroke_color = style.stroke_color == null ? "" : style.stroke_color;
         let stroke_opacity = style.stroke_opacity == null ? "" : parseFloat(style.stroke_opacity)/100.0;
@@ -1692,12 +1657,10 @@ function drawChart(callback) {
                         drop_val = events[num_events-1].value;
                     }
                 }
-                    
                 
                 accumData[newEntry.date] = [ ...(accumData[newEntry.date] ? accumData[newEntry.date] : []), newEntry.value];
                 accumData[newEntry.date] = [ ...(accumData[newEntry.date] ? accumData[newEntry.date] : []), getStyle(deviceIndex, attribute)];
                 current += spacing;
-                    
             }
         });
     });
@@ -1789,17 +1752,13 @@ function placeMarker(dataTable) {
             case "Top":     document.querySelector('.overlay').style.top = Math.floor(chartArea.top) + "px"; + "px"; break;
             case "Middle":   document.querySelector('.overlay').style.top = Math.floor(chartArea.height/2+chartArea.top-height/2) + "px"; + "px"; break;
             case "Bottom":    document.querySelector('.overlay').style.top = Math.floor(chartArea.height+chartArea.top-height) + "px"; + "px"; break;
-
         }
         switch (overlay.horizontal_alignment){
             case "Left":     document.querySelector('.overlay').style.left = Math.floor(chartArea.left) + "px"; break;
             case "Middle":   document.querySelector('.overlay').style.left = Math.floor(chartArea.width/2-(width/2)+chartArea.left) + "px"; break;
             case "Right":    document.querySelector('.overlay').style.left = Math.floor(chartArea.width+chartArea.left-width) + "px"; break;
-
         }
        
-                
-
         //document.querySelector('.overlay').style.width = Math.floor(chartArea.width*0.25) + "px";
         //document.querySelector('.overlay').style.height = Math.floor(chartArea.height*0.25) + "px";
       };
@@ -1816,9 +1775,7 @@ function placeMarker(dataTable) {
     if (show_overlay==true) html+= getOverlay();
    
     html+= """
-        
       </body>
-       
     </html>
     """
     
@@ -1826,14 +1783,13 @@ function placeMarker(dataTable) {
 }
 
 def getOverlay(){
- 
     def html = """<div id="graph-overlay" class="overlay"><table style="width:100%">"""
        
     val = new JsonSlurper().parseText(overlay_order)
     
     val.each{ str->
         splitStr = str.split('_');
-        log.debug(splitStr);
+        parent.logDebug(splitStr);
         deviceId = splitStr[1];
         attribute = splitStr[2];
     
@@ -1916,7 +1872,6 @@ def getSubscriptions() {
     def graph_type_ = [:];
     def states_ = [:];
     
-    
     sensors.each {sensor->
         ids << sensor.idAsLong;
         
@@ -1944,7 +1899,6 @@ def getSubscriptions() {
             def fill_opacity = settings["var_${sensor.id}_${attr}_fill_opacity"];
             def function = settings["var_${sensor.id}_${attr}_function"];
             
-            
             if (settings["attribute_${sensor.id}_${attr}_states"] && settings["attribute_${sensor.id}_${attr}_custom_states"] == true){
                 states_[sensor.id][attr] = [:];  
                 settings["attribute_${sensor.id}_${attr}_states"].each{states->
@@ -1965,7 +1919,6 @@ def getSubscriptions() {
                 left:  settings["attribute_${sensor.id}_${attr}_extend_left"]
             ];
 
-            
             graph_type_[sensor.id][attr] = settings["graph_type_${sensor.id}_${attr}"];
             
             var_[sensor.id][attr] = [ stroke_color :   stroke_color,
@@ -1977,7 +1930,6 @@ def getSubscriptions() {
                                       units:           settings["units_${sensor.id}_${attr}"] ? settings["units_${sensor.id}_${attr}"] : "",
                                     ];
         }//settings
-            
     } //sensors
     
     def obj = [
@@ -1998,11 +1950,10 @@ def getSubscriptions() {
 }
 
 def getColorCode(code){
-    
     ret = "#FFFFFF"
     switch (code){
-        case 7:  ret = "#800000"; break;
-        case 1:	    ret = "#FF0000"; break;
+        case 7: ret = "#800000"; break;
+        case 1:	ret = "#FF0000"; break;
         case 6:	ret = "#FFA500"; break;	
         case 8:	ret = "#FFFF00"; break;	
         case 9:	ret = "#808000"; break;	
