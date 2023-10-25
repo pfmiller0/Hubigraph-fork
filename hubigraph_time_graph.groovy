@@ -1715,12 +1715,48 @@ function drawChart(callback) {
     let chart = new ${drawType}(document.getElementById("timeline"));
 
     //if we have a callback
-    if(callback) google.visualization.events.addListener(chart, 'ready', callback);
+    if (callback) google.visualization.events.addListener(chart, 'ready', callback);
 
     if (options.overlays.display_overlays) google.visualization.events.addListener(chart, 'ready', placeMarker.bind(chart, dataTable));
 
+	/*** pfm test start ***
+	google.visualization.events.addListener(chart, 'ready', function () {
+		var gridlines = container.getElementsByTagName('rect');
+		var highlightIndex = 2;
+		var lineIndex = 0;
+		var lineCount = 0;
+
+		// determine number of gridlines
+		Array.prototype.forEach.call(gridlines, function(line) {
+			if ((line.getAttribute('height') === '1') && (line.getAttribute('fill') === '#cccccc')) {
+				lineCount++;
+			}
+		});
+
+		// gridlines doubled on dual y charts
+		lineCount = lineCount / 2;
+
+		// change gridlines
+		Array.prototype.forEach.call(gridlines, function(line) {
+			if ((line.getAttribute('height') === '1') && (line.getAttribute('fill') === '#cccccc')) {
+				if (lineIndex === highlightIndex) {
+					// change color
+					line.setAttribute('fill', '#4a148c');
+					// change "width"
+					line.setAttribute('height', '5');
+					// center on original y coord
+					line.setAttribute('y', parseFloat(line.getAttribute('y')) - 2);
+				}
+`				lineIndex++;
+				if (lineIndex >= lineCount) {
+					lineIndex = 0;
+				}
+			}
+		});
+	});
+	/*** pfm test end ***/
+
     chart.draw(dataTable, graphOptions);
-    
 }
 
 function updateOverlay(deviceId, attribute, value){
@@ -1741,7 +1777,9 @@ function placeMarker(dataTable) {
         console.debug("Width =", width);
         console.debug(chartArea);
         console.debug(cli);
-        
+
+		// Format hAxis gridlines here? (pfm)
+		// https://stackoverflow.com/questions/49746642/higlight-single-grid-line-in-google-chart
 
         switch (overlay.vertical_alignment){
             case "Top":     document.querySelector('.overlay').style.top = Math.floor(chartArea.top) + "px"; + "px"; break;
