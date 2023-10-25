@@ -983,7 +983,7 @@ def getDays(str){
         case "1 Month":    return 30; break;
         case "2 Months":   return 60; break;
 		case "6 Months":   return 182; break;
-        case "12 Months":  return 365; break;
+        case "12 Months":  return 420; break;
         case "Indefinite": return 0; break;
     }    
     
@@ -1031,6 +1031,7 @@ def updated() {
             case "4 Hours" :    schedule("${minutes} ${minutes} 0/4 * * ? *", longTermStorageUpdate); break;
             case "5 Hours" :    schedule("${minutes} ${minutes} 0/5 * * ? *", longTermStorageUpdate); break;
             case "6 Hours" :    schedule("${minutes} ${minutes} 0/6 * * ? *", longTermStorageUpdate); break;
+            case "12 Hours" :   schedule("${minutes} ${minutes} 0/12 * * ? *", longTermStorageUpdate); break;
         }
     }
 }
