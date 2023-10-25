@@ -1267,14 +1267,14 @@ def getRGBA(hex, opacity){
 }
 
 def getLineGraph() {
-    def fullSizeStyle = "margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color:dimgray;";
-    
+    def fullSizeStyle = "margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color:black;";    
     def html = """
     <html style="${fullSizeStyle}">
     <link rel='icon' href='https://www.shareicon.net/data/256x256/2015/09/07/97252_barometer_512x512.png' type='image/x-icon'/> 
     <link rel="apple-touch-icon" href="https://www.shareicon.net/data/256x256/2015/09/07/97252_barometer_512x512.png">
     <head>
       <title>${app.getLabel()}</title>
+      <p style="font-size:0.1px;">.</p> <!-- pfm: If this tag isn't here the screen flashes white while loading -->
       <script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.16/svg.min.js" integrity="sha256-MCvBrhCuX8GNt0gmv06kZ4jGIi1R2QNaSkadjRzinFs=" crossorigin="anonymous"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>      
@@ -1383,15 +1383,16 @@ async function onLoad() {
     jQuery(document.head).append(`
         <style>
             .loaderContainer {
-                position: fixed;
-                z-index: 100;
-                width: 100%;
-                height: 100%;
-                background-color: dimgray;                
-                display: flex;
-                flex-flow: column nowrap;
-                justify-content: center;
-                align-items: middle;
+               position: fixed;
+               z-index: 100;
+               width: 100%;
+               height: 100%;
+               /* pfm: loading screen bg color */
+               background-color: black;
+               display: flex;
+               flex-flow: column nowrap;
+               justify-content: center;
+               align-items: middle;
             }
             .overlay {
                box-sizing: border-box;
@@ -1418,15 +1419,14 @@ async function onLoad() {
                color: ${overlay_text_color};
                font-family: Arial, Helvetica, sans-serif;
             }
-
             .dotsContainer {
-                height: 60px;
-                padding-bottom: 10px;
+               height: 60px;
+               padding-bottom: 10px;
 
-                display: flex;
-                flex-flow: row nowrap;
-                justify-content: center;
-                align-items: flex-end;
+               display: flex;
+               flex-flow: row nowrap;
+               justify-content: center;
+               align-items: flex-end;
             }
 
             @keyframes bounce {
@@ -1477,6 +1477,8 @@ async function onLoad() {
                 font-weight: 200;
                 font-size: 2rem;
                 text-align: center;
+                /* pfm: loading screen text color */
+                color: white;
             }
         </style>
     `);
