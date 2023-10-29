@@ -205,7 +205,7 @@ def graphSetupPage(){
 
             container <<  parent.hubiForm_sub_section(this, "Other Options");
 
-            container << parent.hubiForm_color (this, "Graph Background",    "graph_background", "#FFFFFF", false)
+            container << parent.hubiForm_color (this, "Graph Background",    "graph_background", "#000000", false)
             container << parent.hubiForm_switch(this, title: "<b>Smooth Graph Points</b><br><small>(Enable Google Graph Smoothing)</small>", name: "graph_smoothing", default: false);
             container << parent.hubiForm_switch(this, title: "<b>Flip Graph to Vertical?</b><br><small>(Rotate 90 degrees)</small>", name: "graph_y_orientation", default: false);
             container << parent.hubiForm_switch(this, title: "<b>Reverse Data Order?</b><br><small> (Flip data left to Right)</small>", name: "graph_z_orientation", default: false)
@@ -216,12 +216,12 @@ def graphSetupPage(){
         parent.hubiForm_section(this,"Graph Title", 1)
         {    
             container = [];
-            container << parent.hubiForm_switch(this, title: "<b>Show Title on Graph</b>", name: "graph_show_title", default: false, submit_on_change: true);
+            container << parent.hubiForm_switch(this, title: "<b>Show Title on Graph</b>", name: "graph_show_title", default: true, submit_on_change: true);
             if (graph_show_title==true) {
                 container << parent.hubiForm_text_input (this, "<b>Graph Title</b>", "graph_title", "Graph Title", false);
                 container << parent.hubiForm_font_size  (this, title: "Title", name: "graph_title", default: 12, min: 2, max: 20);
-                container << parent.hubiForm_color      (this, "Title", "graph_title", "#000000", false);
-                container << parent.hubiForm_switch     (this, title: "Graph Title Inside Graph?", name: "graph_title_inside", default: true);
+                container << parent.hubiForm_color      (this, "Title", "graph_title", "#FFFFFF", false);
+                container << parent.hubiForm_switch     (this, title: "Graph Title Inside Graph?", name: "graph_title_inside", default: false);
             }
             parent.hubiForm_container(this, container, 1); 
         }
@@ -257,7 +257,7 @@ def graphSetupPage(){
             //Axis
             container = [];
             container << parent.hubiForm_font_size  (this, title: "Horizontal Axis", name: "graph_haxis", default: 9, min: 2, max: 20);
-            container << parent.hubiForm_color      (this, "Horizonal Header", "graph_hh", "#C0C0C0", false);
+            container << parent.hubiForm_color      (this, "Horizonal Header", "graph_hh", "#FFFFFF", false);
             container << parent.hubiForm_color      (this, "Horizonal Axis", "graph_ha", "#C0C0C0", false);
             container << parent.hubiForm_text_input (this, "<b>Num Horizontal Gridlines</b><small> (Blank for auto)</small>", "graph_h_num_grid", "", false);
             
@@ -301,7 +301,7 @@ def graphSetupPage(){
          { 
             container = [];
             container << parent.hubiForm_font_size (this, title: "Vertical Axis", name: "graph_vaxis", default: 9, min: 2, max: 20);
-            container << parent.hubiForm_color (this, "Vertical Header", "graph_vh", "#000000", false);
+            container << parent.hubiForm_color (this, "Vertical Header", "graph_vh", "#FFFFFF", false);
             container << parent.hubiForm_color (this, "Vertical Axis", "graph_va", "#C0C0C0", false);
             parent.hubiForm_container(this, container, 1); 
          }
@@ -331,7 +331,7 @@ def graphSetupPage(){
             container << parent.hubiForm_text_input(this,  "<b>Minimum for right axis</b><small> (Blank for auto)</small>", "graph_vaxis_2_min", "", false);
             container << parent.hubiForm_text_input(this,  "<b>Maximum for right axis</b><small> (Blank for auto)</small>", "graph_vaxis_2_max", "", false);   
             container << parent.hubiForm_text_input (this, "<b>Num Vertical Gridlines</b><small> (Blank for auto)</small>", "graph_vaxis_2_num_lines", "", false);
-            container << parent.hubiForm_switch     (this, title: "<b>Show Right Axis Label on Graph</b>", name: "graph_show_right_label", default: false, submit_on_change: true);
+            container << parent.hubiForm_switch     (this, title: "<b>Show Right Axis Label on Graph</b>", name: "graph_show_right_label", default: true, submit_on_change: true);
             if (graph_show_right_label==true){
                 container << parent.hubiForm_text_input (this, "<b>Input right Axis Label</b>", "graph_right_label", "Right Axis Label", false);
                 container << parent.hubiForm_font_size  (this, title: "Right Axis", name: "graph_right", default: 9, min: 2, max: 20);
@@ -348,7 +348,7 @@ def graphSetupPage(){
             container << parent.hubiForm_switch(this, title: "<b>Show Legend on Graph</b>", name: "graph_show_legend", default: false, submit_on_change: true);
             if (graph_show_legend==true){
                 container << parent.hubiForm_font_size  (this, title: "Legend", name: "graph_legend", default: 9, min: 2, max: 20);
-                container << parent.hubiForm_color      (this, "Legend", "graph_legend", "#000000", false);
+                container << parent.hubiForm_color      (this, "Legend", "graph_legend", "#FFFFFF", false);
                 parent.hubiForm_container(this, container, 1); 
                 input( type: "enum", name: "graph_legend_position", title: "<b>Legend Position</b>", defaultValue: "Bottom", options: legendPosition);
                 input( type: "enum", name: "graph_legend_in side_position", title: "<b>Legend Justification</b>", defaultValue: "center", options: insidePosition);
@@ -459,7 +459,7 @@ def graphSetupPage(){
                         container << parent.hubiForm_enum (this, title:             "Axis Side", 
                                                                  name:              "graph_axis_number_${sensor.id}_${attribute}",
                                                                  list:              ["Left", "Right"],
-                                                                 default:           "Left");
+                                                                 default:           "Right");
                         
                         def colorText = "";
                         def fillText = "";
@@ -543,7 +543,7 @@ def graphSetupPage(){
                                 
                                  container << parent.hubiForm_slider (this, title: "Point Size", 
                                                                             name:  "var_${sensor.id}_${attribute}_point_size",  
-                                                                            default: 5, 
+                                                                            default: 2, 
                                                                             min: 0,
                                                                             max: 60, 
                                                                             units: " points",
@@ -706,7 +706,7 @@ def graphSetupPage(){
                         
                         container << parent.hubiForm_text_input(this,   "<small></i>Use %deviceName% for DEVICE and %attributeName% for ATTRIBUTE</i></small>",
                                                                                 "graph_name_override_${sensor.id}_${attribute}",
-                                                                                "%deviceName%: %attributeName%", false);
+                                                                                "%deviceName%", false);
                         
                         container << parent.hubiForm_text_input(this,   "<b>Units for Pretty Display</b>",
                                                                         "units_${sensor.id}_${attribute}",
@@ -911,10 +911,11 @@ def longTermStoragePage(){
                                                                 default: "1 Hour",
                                                                 submit_on_change: false);
                        
-                        if (lts_time == null) 
+                        if (lts_time == null) {
                             app.updateSetting("lts_time",   [type: "enum", value: "1 Week"]);
                             app.updateSetting("lts_update", [type: "enum", value: "1 Hour"]);
-                        lts_time = "1 Week";
+                        	lts_time = "1 Week";
+						}
                         
                         def factor = getDays(lts_time);
                         
@@ -1049,8 +1050,8 @@ private cleanupData(data){
            then -= getDays(lts_time);
     }
     then_milliseconds = then.getTime();
-    
-    return data.findAll{ it.date >= then_milliseconds };
+	
+	return data.findAll { it.date >= then_milliseconds };
 }
 
 // TODO: Cleanup old devices? (pfm)
