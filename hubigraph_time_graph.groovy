@@ -1046,7 +1046,7 @@ private getValue(id, attr, val){
 // Pre-integrate lts data to reduce excessive data storage and processing (pfm)
 private List reduceList(List inList, Integer groupTime, String function) {
 	if (groupTime < 60*60*1000) {
-		return inList
+		return inList // Skip integration time less than 1 hour
 	} else if (groupTime > 10*24*60*60*1000) {
 		log.debug "Pre-integration disabled"
 		return inList // TESTING: Skip integration times over a week
@@ -1065,11 +1065,14 @@ private List reduceList(List inList, Integer groupTime, String function) {
 	} else if (groupTime >= 60*60*1000){
 		grouped = list_older.groupBy {t.setTime(it.date); c.setTime(t); return "${c[Calendar.YEAR]}-${c[Calendar.DAY_OF_YEAR]}-${c[Calendar.HOUR_OF_DAY]}"}
 	}
-	/*** //322 2023-302-15
-	log.debug grouped.each {log.debug it}
+	
+	/***/
+	log.debug "Raw data:"
+	grouped.each {k, v-> if (v.size() > 1) log.debug "${k}: ${v}"}
 	/***/
 	
 	if (function == "Max") {
+		log.debug grouped.values().findResults {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.max {it.value}.value)]}
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.max {it.value}.value)]} + list_newer
 	} else if (function == "Min") {
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.min {it.value}.value)]} + list_newer
@@ -1078,6 +1081,9 @@ private List reduceList(List inList, Integer groupTime, String function) {
 	} else if (function == "Sum") {
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})]} + list_newer
 	} else {
+		log.debug "Reduced data:"
+		//log.debug grouped.values().collect {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]}
+		log.debug grouped.values().findResults {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]}
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]} + list_newer
 	}
 }
@@ -1089,16 +1095,14 @@ private cleanupData(data, sensor, attribute){
     }
     then_milliseconds = then.getTime();
 	
-	List clean_list = data.findAll { it.date >= then_milliseconds };
-	if (sensor == "322") {
-		List reduced_list = reduceList(clean_list, Integer.parseInt(graph_update_rate), settings["var_${sensor}_${attribute}_function"])
-	}
-
+	List clean_list = data.findAll{ it.date >= then_milliseconds };
+	List reduced_list = reduceList(clean_list, Integer.parseInt(graph_update_rate), settings["var_${sensor}_${attribute}_function"])
+	
 	if (reduced_list && clean_list.size() != reduced_list.size()) {
-		log.debug "Reduced list (${sensor}): ${clean_list.size()} -> ${reduced_list.size()}"
+		log.debug "Reduced list size (${sensor}): ${clean_list.size()} -> ${reduced_list.size()}"
 	}
 
-    return clean_list;	
+    return reduced_list;
 }
 
 // TODO: Cleanup old devices? (pfm)
