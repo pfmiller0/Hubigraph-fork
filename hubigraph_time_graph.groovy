@@ -967,7 +967,7 @@ def getDays(str){
         case "1 Month":    return 30; break;
         case "2 Months":   return 60; break;
 		case "6 Months":   return 182; break;
-        case "12 Months":  return 370; break;
+        case "12 Months":  return 420; break;
         case "Indefinite": return 0; break;
     }    
     
@@ -1046,13 +1046,7 @@ private getValue(id, attr, val){
 // Pre-integrate lts data to reduce excessive data storage and processing (pfm)
 private List reduceList(List inList, Integer groupTime, String function) {
 	if (groupTime < 60*60*1000) {
-		return inList // Skip integration time less than 1 hour
-	} else if (groupTime > 10*24*60*60*1000) {
-		log.debug "Pre-integration disabled"
-		return inList // TESTING: Skip integration times over a week
-	} else if (groupTime > 50*24*60*60*1000) {
-		log.debug "Pre-integration disabled"
-		return inList // TESTING: Skip integration times over a month
+		return inList // Skip integration time less than 1 day
 	}
 	
 	List list_older = inList.findAll {it.date <= (now() - groupTime*2)}
@@ -1105,12 +1099,12 @@ private cleanupData(data, sensor, attribute){
     return reduced_list;
 }
 
-// TODO: Cleanup old devices? (pfm)
 private buildData() {
     def resp = [:]
     
     def graph_time;
     def then = new Date();
+	List active_device_history = [];
     
     use (groovy.time.TimeCategory) {
            val =  Double.parseDouble("${graph_timespan}")/1000.0;
@@ -1127,6 +1121,7 @@ private buildData() {
                 if (atomicState["history_${sensor.id}_${attribute}"]) {
                     oldData = atomicState["history_${sensor.id}_${attribute}"];
                     then = new Date(oldData[oldData.size-1].date);
+					active_device_history << "history_${sensor.id}_${attribute}"
                 } else {
                      oldData = [];   
                 }
@@ -1150,6 +1145,7 @@ private buildData() {
             }    
         }
     }
+	atomicState.keySet().each {if (it.startsWith("history_")) {if (!("${it}" in active_device_history)) {log.debug "inactive history: ${it}";/*log.debug "removing inactive history: ${it}"; atomicState.remove(it)*/}}}
     return resp;
 }
 
