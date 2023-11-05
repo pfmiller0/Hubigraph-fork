@@ -790,7 +790,8 @@ def mainPage() {
                 }
                 parent.hubiForm_section(this, "Local Graph URL", 1, "link"){
                     container = [];
-                    container << parent.hubiForm_text(this, "${state.localEndpointURL}graph/?access_token=${state.endpointSecret}");
+					// Make the link on timeline graph app clickable (github user kennethxu)
+                    container << parent.hubiForm_text(this, "${state.localEndpointURL}graph/?access_token=${state.endpointSecret}", "${state.localEndpointURL}graph/?access_token=${state.endpointSecret}");
                     
                     parent.hubiForm_container(this, container, 1); 
                 }
