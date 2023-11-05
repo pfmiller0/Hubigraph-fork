@@ -1084,70 +1084,72 @@ private List reduceList(List inList, Integer groupTime, String function) {
 }
 
 private cleanupData(data, sensor, attribute){
-    def then = new Date();
-    use (groovy.time.TimeCategory) {
-           then -= getDays(lts_time);
-    }
-    then_milliseconds = then.getTime();
+	def then = new Date();
+	use (groovy.time.TimeCategory) {
+		then -= getDays(lts_time);
+	}
+	then_milliseconds = then.getTime();
 	
-	List clean_list = data.findAll{ it.date >= then_milliseconds };
+	List clean_list = data.findAll { it.date >= then_milliseconds };
 	List reduced_list = reduceList(clean_list, Integer.parseInt(graph_update_rate), settings["var_${sensor}_${attribute}_function"])
 	
 	if (reduced_list && clean_list.size() != reduced_list.size()) {
 		log.debug "Reduced list size (${sensor}): ${clean_list.size()} -> ${reduced_list.size()}"
 	}
 
-    return reduced_list;
+	return reduced_list;
 }
 
 private buildData() {
-    def resp = [:]
-    
-    def graph_time;
-    def then = new Date();
+	def resp = [:]
+	def graph_time;
+	def then = new Date();
 	List active_device_history = [];
     
-    use (groovy.time.TimeCategory) {
-           val =  Double.parseDouble("${graph_timespan}")/1000.0;
-           then -= ((int)val).seconds;
-           graph_time = then.getTime();
-    }
+	use (groovy.time.TimeCategory) {
+		val =  Double.parseDouble("${graph_timespan}")/1000.0;
+		then -= ((int)val).seconds;
+		graph_time = then.getTime();
+	}
     
-    if(sensors) {
-        sensors.each { sensor ->
-            resp[sensor.id] = [:];
-            settings["attributes_${sensor.id}"].each {attribute ->
-                def newData = [];  
-                //if this exists in storage
-                if (atomicState["history_${sensor.id}_${attribute}"]) {
-                    oldData = atomicState["history_${sensor.id}_${attribute}"];
-                    then = new Date(oldData[oldData.size-1].date);
+	if(sensors) {
+		sensors.each { sensor ->
+			resp[sensor.id] = [:];
+			settings["attributes_${sensor.id}"].each {attribute ->
+				def newData = [];  
+				//if this exists in storage
+				if (atomicState["history_${sensor.id}_${attribute}"]) {
+					oldData = atomicState["history_${sensor.id}_${attribute}"];
+					then = new Date(oldData[oldData.size-1].date);
 					active_device_history << "history_${sensor.id}_${attribute}"
-                } else {
-                     oldData = [];   
-                }
+				} else {
+					oldData = [];   
+				}
                 
-                newData << sensor.statesSince(attribute, then, [max: 2000]).collect{[ date: it.date.getTime(), value: getValue(sensor.id, attribute, it.value)]}
-                newData = newData.flatten();
-                oldData += newData.reverse();
+				newData << sensor.statesSince(attribute, then, [max: 2000]).collect{[ date: it.date.getTime(), value: getValue(sensor.id, attribute, it.value)]}
+				newData = newData.flatten();
+				oldData += newData.reverse();
                          
-                resp[sensor.id][attribute] = oldData.findAll{ it.date > graph_time}; 
+				resp[sensor.id][attribute] = oldData.findAll{ it.date > graph_time}; 
                 
-                //Restrict "bad" values 
-                if (settings["attribute_${sensor.id}_${attribute}_bad_value"]==true){
-                    min = Float.valueOf(settings["attribute_${sensor.id}_${attribute}_min_value"]);
-                    max = Float.valueOf(settings["attribute_${sensor.id}_${attribute}_max_value"]);
-                    resp[sensor.id][attribute] = resp[sensor.id][attribute].findAll{ it.value > min && it.value < max}; 
-                }
+				//Restrict "bad" values 
+				if (settings["attribute_${sensor.id}_${attribute}_bad_value"]==true){
+					min = Float.valueOf(settings["attribute_${sensor.id}_${attribute}_min_value"]);
+					max = Float.valueOf(settings["attribute_${sensor.id}_${attribute}_max_value"]);
+					resp[sensor.id][attribute] = resp[sensor.id][attribute].findAll{ it.value > min && it.value < max}; 
+				}
                 
-                if (lts){
-                    atomicState["history_${sensor.id}_${attribute}"] = cleanupData(oldData, sensor.id, attribute);
-                } else atomicState["history_${sensor.id}_${attribute}"] = null;
-            }    
-        }
-    }
+				if (lts){
+					atomicState["history_${sensor.id}_${attribute}"] = cleanupData(oldData, sensor.id, attribute);
+				} else {
+					atomicState["history_${sensor.id}_${attribute}"] = null;
+				}
+			}    
+		}
+	}
+	
 	atomicState.keySet().each {if (it.startsWith("history_")) {if (!("${it}" in active_device_history)) {log.info "removing inactive history: ${it}"; atomicState.remove(it)}}}
-    return resp;
+	return resp;
 }
 
 def getChartOptions(){
