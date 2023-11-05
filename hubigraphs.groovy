@@ -61,6 +61,7 @@ def mainPage(){
 	}
     }
 }
+
 def getOpenWeatherData(){
     childDevice =  getChildDevice("OPEN_WEATHER${app.id}");
     if (!childDevice){
@@ -211,11 +212,14 @@ def hubiForm_table(Map map, child){
     }
 }
 
-def hubiForm_text(child, text){
+// Make the link on timeline graph app clickable (github user kennethxu)
+def hubiForm_text(child, text, link=null){
     child.call(){
-        def html_ = """$text""";
-    
-        return html_
+        if (link != null){
+            return  """<a href="${link}" target="_blank">${text}</a>""";
+        } else {
+            return """${text}""";
+        }
     }
 }
 
@@ -253,13 +257,12 @@ def hubiForm_page_button(child, title, page, width, icon=""){
         return html_;
 }
 
-
-
 def hubiForm_section(child, title, pos, icon="", Closure code) {
 	
         child.call(){
                 def id = title.replace(' ', '_').replace('(', '').replace(')','');
-                def title_ = title.replace("'", "’").replace("`", "’");
+				// Fix device header missing issue when there is special char in name (github user kennethxu)
+				def title_ = groovy.xml.XmlUtil.escapeXml(title);
 
                 def titleHTML = """
                         <div class="mdl-layout__header" style="display: block; background:#033673; margin: 0 -16px; width: calc(100% + 32px); position: relative; z-index: ${pos}; overflow: visible;">          
@@ -1063,6 +1066,12 @@ def hubiTools_check_list(child, sensors, list_){
     }
     return (result & count_result);  
     
+}
+
+void logDebug(def str) {
+	if (debugMode) {
+		log.debug str
+	}
 }
 
 /********************************************************************************************************************************************
