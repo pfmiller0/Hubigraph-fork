@@ -1145,7 +1145,7 @@ private buildData() {
             }    
         }
     }
-	atomicState.keySet().each {if (it.startsWith("history_")) {if (!("${it}" in active_device_history)) {log.debug "inactive history: ${it}";/*log.debug "removing inactive history: ${it}"; atomicState.remove(it)*/}}}
+	atomicState.keySet().each {if (it.startsWith("history_")) {if (!("${it}" in active_device_history)) {log.info "removing inactive history: ${it}"; atomicState.remove(it)}}}
     return resp;
 }
 
