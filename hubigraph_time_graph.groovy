@@ -528,10 +528,10 @@ def graphSetupPage(){
                             container <<  parent.hubiForm_sub_section(this, "Data Points");
                             
                             if (graphType == "Line" || graphType == "Area"){
-                                container << parent.hubiForm_switch(this, title: "<b>Display Data Points on Line?</b>", name: "var_${sensor.id}_${attribute}_line_plot_points", default: false, submit_on_change: true);
+                                container << parent.hubiForm_switch(this, title: "<b>Display Data Points on Line?</b>", name: "var_${sensor.id}_${attribute}_line_plot_points", default: true, submit_on_change: true);
                             }
                             
-                            if (settings["var_${sensor.id}_${attribute}_line_plot_points"] || graphType == "Scatter"){
+                            if (settings["var_${sensor.id}_${attribute}_line_plot_points"]!=false || graphType == "Scatter"){
                                 
                                  
                                 container << parent.hubiForm_enum (this, 
