@@ -345,8 +345,8 @@ def graphSetupPage(){
             container = [];
             def legendPosition = [["top": "Top"], ["bottom":"Bottom"], ["in": "Inside Top"]];
             def insidePosition = [["start": "Left"], ["center": "Center"], ["end": "Right"]];
-            container << parent.hubiForm_switch(this, title: "<b>Show Legend on Graph</b>", name: "graph_show_legend", default: false, submit_on_change: true);
-            if (graph_show_legend==true){
+            container << parent.hubiForm_switch(this, title: "<b>Show Legend on Graph</b>", name: "graph_show_legend", default: true, submit_on_change: true);
+            if (graph_show_legend!=false){
                 container << parent.hubiForm_font_size  (this, title: "Legend", name: "graph_legend", default: 9, min: 2, max: 20);
                 container << parent.hubiForm_color      (this, "Legend", "graph_legend", "#FFFFFF", false);
                 parent.hubiForm_container(this, container, 1); 
