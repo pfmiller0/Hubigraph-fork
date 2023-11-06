@@ -1116,12 +1116,14 @@ private buildData() {
 		sensors.each { sensor ->
 			resp[sensor.id] = [:];
 			settings["attributes_${sensor.id}"].each {attribute ->
+				// Save as active data so it is not cleaned up (pfm)
+				active_device_history << "history_${sensor.id}_${attribute}"
+
 				def newData = [];  
 				//if this exists in storage
 				if (atomicState["history_${sensor.id}_${attribute}"]) {
 					oldData = atomicState["history_${sensor.id}_${attribute}"];
 					then = new Date(oldData[oldData.size-1].date);
-					active_device_history << "history_${sensor.id}_${attribute}"
 				} else {
 					oldData = [];   
 				}
