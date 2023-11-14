@@ -1052,25 +1052,32 @@ private List reduceList(List inList, Integer groupTime, String function) {
 	if (groupTime < 60*60*1000) {
 		return inList // Skip integration time less than 1 day
 	}
+
+	// Round time down to start of hour so we are not splitting up hours
+	Date d = new Date()
+	Calendar c = d.toCalendar()
+	c.clearTime()	
+	c.set(Calendar.HOUR_OF_DAY, d[Calendar.HOUR_OF_DAY])
+	Long hourFloor = c.getTimeInMillis()
 	
-	List list_older = inList.findAll {it.date <= (now() - groupTime*2)}
-	List list_newer = inList.findAll {it.date > (now() - groupTime*2)}
+	List list_older = inList.findAll {it.date < (hourFloor - groupTime*2)}
+	List list_newer = inList.findAll {it.date >= (hourFloor - groupTime*2)}
 
 	Date t = new Date()
-	Calendar c = Calendar.getInstance()
+	//Calendar c = Calendar.getInstance()
 	if (groupTime >= 24*60*60*1000) {
 		grouped = list_older.groupBy {t.setTime(it.date); c.setTime(t); return "${c[Calendar.YEAR]}-${c[Calendar.DAY_OF_YEAR]}"}
 	} else if (groupTime >= 60*60*1000){
 		grouped = list_older.groupBy {t.setTime(it.date); c.setTime(t); return "${c[Calendar.YEAR]}-${c[Calendar.DAY_OF_YEAR]}-${c[Calendar.HOUR_OF_DAY]}"}
 	}
 	
-	/***/
+	/***
 	log.debug "Raw data:"
 	grouped.each {k, v-> if (v.size() > 1) log.debug "${k}: ${v}"}
 	/***/
 	
 	if (function == "Max") {
-		log.debug grouped.values().findResults {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.max {it.value}.value)]}
+		//log.debug grouped.values().findResults {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.max {it.value}.value)]}
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.max {it.value}.value)]} + list_newer
 	} else if (function == "Min") {
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.min {it.value}.value)]} + list_newer
@@ -1079,9 +1086,9 @@ private List reduceList(List inList, Integer groupTime, String function) {
 	} else if (function == "Sum") {
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})]} + list_newer
 	} else {
-		log.debug "Reduced data:"
+		//log.debug "Reduced data:"
 		//log.debug grouped.values().collect {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]}
-		log.debug grouped.values().findResults {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]}
+		//log.debug grouped.values().findResults {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]}
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]} + list_newer
 	}
 }
