@@ -413,6 +413,7 @@ def graphSetupPage(){
         def show_bar = false;
         def show_scatter = false;
 
+		sensors.sort {it.displayName}
 		sensors.each { sensor ->        
                 settings["attributes_${sensor.id}"].each { attribute ->              
                         switch (settings["graph_type_${sensor.id}_${attribute}"]){
@@ -729,6 +730,7 @@ def deviceSelectionPage() {
              input "sensors", "capability.*", title: "Sensors", multiple: true, required: true, submitOnChange: true
         
             if (sensors){
+				sensors.sort {it.displayName}
                 sensors.each {
                     attributes_ = it.getSupportedAttributes();
                     final_attrs = [];
@@ -912,7 +914,12 @@ def longTermStoragePage(){
                                                                 list: updateEnum,
                                                                 default: "1 Hour",
                                                                 submit_on_change: false);
-						                       
+						
+						container << parent.hubiForm_switch(this, title: "<b>Integrate stored data</b><br>Warning! This will drastically reduce storage size, however changes to integration function setting will only apply to new data", 
+															name: "lts_pre_integrate", 
+															default: false, 
+															submit_on_change: true);
+                       
                         if (lts_time == null) {
                             app.updateSetting("lts_time",   [type: "enum", value: "1 Week"]);
                             app.updateSetting("lts_update", [type: "enum", value: "1 Hour"]);
@@ -1049,7 +1056,9 @@ private getValue(id, attr, val){
 
 // Pre-integrate lts data to reduce excessive data storage and processing (pfm)
 private List reduceList(List inList, Integer groupTime, String function) {
-	if (groupTime < 60*60*1000) {
+	if (settings["lts_pre_integrate"] != true) {
+		return inList // Pre-integration disabled
+	} else if (groupTime < 60*60*1000) {
 		return inList // Skip integration time less than 1 day
 	}
 
