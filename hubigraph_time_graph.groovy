@@ -1030,6 +1030,8 @@ def updated() {
             case "12 Hours" :   schedule("${minutes} ${minutes} 0/12 * * ? *", longTermStorageUpdate); break;
         }
     }
+	
+	cleanupRemovedDeviceData()
 }
 
 def initialize() {
@@ -1094,11 +1096,15 @@ private List reduceList(List inList, Integer groupTime, String function) {
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g[Math.floor(g.size()/2)].value)]} + list_newer
 	} else if (function == "Sum") {
 		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})]} + list_newer
-	} else {
+	} else if (function == "Average") {
 		//log.debug "Reduced data:"
 		//log.debug grouped.values().collect {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]}
 		//log.debug grouped.values().findResults {g-> if (g.size() > 1) [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]}
-		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]} + list_newer
+		//return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: (g.sum {it.value})/g.size()]} + list_newer
+		return grouped.values().collect {g-> [date: (g.sum {it.date}/g.size()).longValue(), value: Math.round(100*((g.sum {it.value})/g.size()))/100]} + list_newer
+	} else {
+		log.error "Invalid integration function selected!"
+		return inList
 	}
 }
 
@@ -1119,11 +1125,24 @@ private cleanupData(data, sensor, attribute){
 	return reduced_list;
 }
 
+private cleanupRemovedDeviceData() {
+	List active_devices = [];
+
+	if (sensors) sensors.each {active_devices << it.id}
+
+	settings.keySet().each {if (it.startsWith("var_") || it.startsWith("attribute_") || it.startsWith("attributes_")) {
+		if (!(it.split('_')[1] in active_devices)) {log.info "removing inactive setting: ${it}"; app.removeSetting(it)}}
+	}
+	
+	atomicState.keySet().each {if (it.startsWith("history_")) {
+		if (!(it.split('_')[1] in active_devices)) {log.info "removing inactive history: ${it}"; atomicState.remove(it)}}
+	}
+}
+
 private buildData() {
 	def resp = [:]
 	def graph_time;
 	def then = new Date();
-	List active_device_history = [];
     
 	use (groovy.time.TimeCategory) {
 		val =  Double.parseDouble("${graph_timespan}")/1000.0;
@@ -1135,9 +1154,6 @@ private buildData() {
 		sensors.each { sensor ->
 			resp[sensor.id] = [:];
 			settings["attributes_${sensor.id}"].each {attribute ->
-				// Save as active data so it is not cleaned up (pfm)
-				active_device_history << "history_${sensor.id}_${attribute}"
-
 				def newData = [];  
 				//if this exists in storage
 				if (atomicState["history_${sensor.id}_${attribute}"]) {
@@ -1169,7 +1185,6 @@ private buildData() {
 		}
 	}
 	
-	atomicState.keySet().each {if (it.startsWith("history_")) {if (!("${it}" in active_device_history)) {log.info "removing inactive history: ${it}"; atomicState.remove(it)}}}
 	return resp;
 }
 
