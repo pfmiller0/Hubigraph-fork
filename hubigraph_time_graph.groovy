@@ -173,7 +173,7 @@ def graphSetupPage(){
             }
 
             container << parent.hubiForm_slider (this,  title: "<b>Weeks</b>", name: "graph_timespan_weeks",  
-                                                        default: 0, min: 0, max: 104, units: " weeks", submit_on_change: true);
+                                                        default: 0, min: 0, max: 260, units: " weeks", submit_on_change: true);
 
             container << parent.hubiForm_slider (this,  title: "<b>Days</b>", name: "graph_timespan_days",  
                                                         default: 0, min: 0, max: 30, units: " days", submit_on_change: true);
@@ -412,7 +412,8 @@ def graphSetupPage(){
         def show_tile = false;
         def show_bar = false;
         def show_scatter = false;
-        sensors.each { sensor ->        
+
+		sensors.each { sensor ->        
                 settings["attributes_${sensor.id}"].each { attribute ->              
                         switch (settings["graph_type_${sensor.id}_${attribute}"]){
                             case "Bar"      : show_title = true; show_bar = true; break;
@@ -890,14 +891,14 @@ def longTermStoragePage(){
                 }
 
 				parent.hubiForm_section(this, "Storage Options", 1, "memory"){
-                    def timeEnum = ["1 Day", "2 Days", "3 Days", "4 Days", "5 Days", "6 Days", "1 Week", "2 Weeks", "3 Weeks", "1 Month", "2 Months", "6 Months", "12 Months", "Indefinite"];
+                    def timeEnum = ["1 Day", "2 Days", "3 Days", "4 Days", "5 Days", "6 Days", "1 Week", "2 Weeks", "3 Weeks", "1 Month", "2 Months", "6 Months", "1 Year", "2 Years", "5 Years", "Indefinite"];
                     def updateEnum = ["5 Minutes", "15 Minutes", "30 Minutes", "1 Hour", "2 Hours", "3 Hours", "4 Hours", "5 Hours", "6 Hours", "12 Hours"];
-                  
-                    container = [];
-                    container << parent.hubiForm_switch(this, title: "<b>Utilize Long Term Storage for Sensors</b>", 
-                                                              name: "lts", 
-                                                              default: false, 
-                                                              submit_on_change: true);
+
+					container = [];
+					container << parent.hubiForm_switch(this, title: "<b>Utilize Long Term Storage for Sensors</b>", 
+														name: "lts", 
+														default: false, 
+														submit_on_change: true);
                             
                     if (lts == true){
                        container << parent.hubiForm_enum(this, title: "Time of Storage to Maintain",
@@ -911,7 +912,7 @@ def longTermStoragePage(){
                                                                 list: updateEnum,
                                                                 default: "1 Hour",
                                                                 submit_on_change: false);
-                       
+						                       
                         if (lts_time == null) {
                             app.updateSetting("lts_time",   [type: "enum", value: "1 Week"]);
                             app.updateSetting("lts_update", [type: "enum", value: "1 Hour"]);
@@ -968,7 +969,9 @@ def getDays(str){
         case "1 Month":    return 30; break;
         case "2 Months":   return 60; break;
 		case "6 Months":   return 182; break;
-        case "12 Months":  return 420; break;
+        case "1 Year":     return 425; break;
+        case "2 Years":    return 790; break;
+        case "5 Years":    return 1885; break;
         case "Indefinite": return 0; break;
     }    
     
@@ -1127,8 +1130,8 @@ private buildData() {
 				} else {
 					oldData = [];   
 				}
-                
-				newData << sensor.statesSince(attribute, then, [max: 2000]).collect{[ date: it.date.getTime(), value: getValue(sensor.id, attribute, it.value)]}
+				
+ 				newData << sensor.statesSince(attribute, then, [max: 2000]).collect{[ date: it.date.getTime(), value: getValue(sensor.id, attribute, it.value)]}
 				newData = newData.flatten();
 				oldData += newData.reverse();
                          
@@ -1155,7 +1158,6 @@ private buildData() {
 }
 
 def getChartOptions(){
-    
     /*Setup Series*/
     def series = ["series" : [:]];
 
